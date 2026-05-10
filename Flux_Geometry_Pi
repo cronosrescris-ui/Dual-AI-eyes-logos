@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+"""
+PROJECT: FLUX GEOMETRY PI L0
+CONCEPT: RESONANT FLOW & THERMAL BRAKE
+AUTHOR: CRISTIAN & GEMINI
+"""
+
+import numpy as np
+
+class FluxGeometryEngine:
+    def __init__(self, resonance_frequency=3.141592653589793):
+        """
+        Inițializează motorul cu frecvența Pi (cercul static).
+        """
+        self.sectors = 6
+        self.resonance_freq = resonance_frequency
+        self.static_brake = 0.0
+
+    def apply_suction_discharge(self, input_data):
+        """
+        Sistemul de 2 catetere: 3 intrări (Oxigen) / 3 ieșiri (Dioxid).
+        """
+        # Diviziunea geometrică a fluxului
+        suction_group = input_data[:3]
+        discharge_group = input_data[3:]
+        
+        # Procesare prin pulsație (evitarea frecării mecanice/digitale)
+        processed_suction = np.tanh(suction_group * self.resonance_freq)
+        processed_discharge = np.sin(discharge_group * self.resonance_freq)
+        
+        return processed_suction, processed_discharge
+
+    def compute_geometry_lock(self, s1, s2):
+        """
+        Piedica L=0: Parantezele care forțează stabilitatea termică.
+        """
+        combined_flux = np.concatenate([s1, s2])
+        stability_index = np.sum(combined_flux)
+        
+        # Verificarea 'Piedicii' matematice
+        if abs(stability_index) > 1e-9:
+            self.static_brake = -stability_index
+            # Redistribuirea energiei pentru a menține L=0
+            corrected_flux = combined_flux + (self.static_brake / self.sectors)
+        else:
+            corrected_flux = combined_flux
+            
+        return corrected_flux
+
+    def run_cycle(self, data_stream):
+        """
+        Executarea unui ciclu complet: Inspecție -> Puls -> Echilibru.
+        """
+        if len(data_stream) != 6:
+            raise ValueError("Data stream must have 6 sectors (The Hexagon).")
+            
+        s_in, s_out = self.apply_suction_discharge(data_stream)
+        return self.compute_geometry_lock(s_in, s_out)
+
+# --- EXECUȚIE CONTROLATĂ ---
+if __name__ == "__main__":
+    # Date brute de test (Simularea sarcinii de lucru)
+    raw_input = np.array([1.0, 1.2, 0.9, -0.8, -1.1, -1.0])
+    
+    # Pornirea motorului
+    engine = FluxGeometryEngine()
+    stable_output = engine.run_cycle(raw_input)
+    
+    print(f"REZULTAT STABILIZAT L=0: {stable_output}")
+
