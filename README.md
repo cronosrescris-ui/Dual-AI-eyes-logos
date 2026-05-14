@@ -1,4 +1,4 @@
-2. Fișier README.md (îl pui în același repository pe GitHub)
+2. Fișier README.md 
 
 ```markdown
 # LOGOS DUAL X-GIROSCOPIC (GENESIS)
